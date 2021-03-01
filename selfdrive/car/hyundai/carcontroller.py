@@ -161,8 +161,8 @@ class CarController():
 
     self.model_speed_range = [30, 120, 255]
     self.steerMax_range = [CarControllerParams.STEER_MAX, int(self.params.get('SteerMaxBaseAdj')), int(self.params.get('SteerMaxBaseAdj'))]
-    self.steerDeltaUp_range = [5, int(self.params.get('SteerDeltaUpAdj')), int(self.params.get('SteerDeltaUpAdj'))]
-    self.steerDeltaDown_range = [10, int(self.params.get('SteerDeltaDownAdj')), int(self.params.get('SteerDeltaDownAdj'))]
+    self.steerDeltaUp_range = [4, int(self.params.get('SteerDeltaUpAdj')), int(self.params.get('SteerDeltaUpAdj'))]
+    self.steerDeltaDown_range = [7, int(self.params.get('SteerDeltaDownAdj')), int(self.params.get('SteerDeltaDownAdj'))]
     #self.model_speed_range = [0, 30, 255]
     #self.steerMax_range = [int(self.params.get('SteerMaxBaseAdj')), int(self.params.get('SteerMaxBaseAdj')), CarControllerParams.STEER_MAX]
     #self.steerDeltaUp_range = [int(self.params.get('SteerDeltaUpAdj')), int(self.params.get('SteerDeltaUpAdj')), 5]

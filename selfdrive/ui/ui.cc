@@ -131,7 +131,7 @@ static void update_model(UIState *s, const cereal::ModelDataV2::Reader &model) {
   const float lead_d = scene.lead_data[0].getStatus() ? scene.lead_data[0].getDRel() * 2. : MAX_DRAW_DISTANCE;
   float path_length = (lead_d > 0.) ? lead_d - fmin(lead_d * 0.35, 10.) : MAX_DRAW_DISTANCE;
   path_length = fmin(path_length, max_distance);
-  update_line_data(s, model.getPosition(), 0.7, 1.22, &scene.track_vertices, path_length);
+  update_line_data(s, model.getPosition(), 0.8, 1.22, &scene.track_vertices, path_length);
 }
 
 static void update_sockets(UIState *s) {
