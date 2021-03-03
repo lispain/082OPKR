@@ -624,10 +624,10 @@ static void ui_draw_vision_event(UIState *s) {
   const NVGcolor color = bg_colors[s->status];
 
   if (s->scene.limitSpeedCamera > 29) {
-    const int img_x = s->viz_rect.x + bdr_s + 205;
-    const int img_y = viz_event_y + 275;
-    const int img_x_size = 172*1.5;
-    const int img_y_size = 271*1.5;
+    const int img_x = s->viz_rect.x + bdr_s + 215;
+    const int img_y = viz_event_y + 320;
+    const int img_x_size = 200*1.5;
+    const int img_y_size = 200*1.5;
     float img_turn_alpha = 0.7f;
     ui_draw_image(s, {img_x, img_y, img_x_size, img_y_size}, "safetycam", img_turn_alpha);
   }
