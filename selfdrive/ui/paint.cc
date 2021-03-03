@@ -513,7 +513,7 @@ static void ui_draw_vision_cruise_speed(UIState *s) {
   if (s->scene.limitSpeedCamera > 29 && s->is_speed_over_limit) {
     color = COLOR_RED;
   } else {
-    color = s->scene.limitSpeedCamera > 29 ? COLOR_WHITE : COLOR_WHITE_ALPHA(15);
+    color = s->scene.limitSpeedCamera > 29 ? COLOR_WHITE_ALPHA(0) : COLOR_WHITE_ALPHA(15);
   }   
   ui_draw_rect(s->vg, rect, color, 10, 20.);
 
