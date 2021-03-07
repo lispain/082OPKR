@@ -95,13 +95,21 @@ class LateralPlanner():
     #self.steer_actuator_delay_vel = [3, 13]
     #self.new_steer_actuator_delay = CP.steerActuatorDelay
 
-    self.angle_offset_select = int(Params().get('OpkrAngleOffsetSelect'))
-
     self.standstill_elapsed_time = 0.0
     self.output_scale = 0.0
     self.v_cruise_kph = 0
     self.steerRatio_to_send = 0
     self.stand_still = False
+
+  # Atom's steer angle limitation
+  def limit_ctrl(self, value, limit, offset ):
+      p_limit = offset + limit
+      m_limit = offset - limit
+      if value > p_limit:
+          value = p_limit
+      elif  value < m_limit:
+          value = m_limit
+      return value
 
   def setup_mpc(self):
     self.libmpc = libmpc_py.libmpc
@@ -218,16 +226,16 @@ class LateralPlanner():
         self.lane_change_adjust_new = interp(v_ego, self.lane_change_adjust_vel, self.lane_change_adjust)
         self.lane_change_ll_prob = max(self.lane_change_ll_prob - self.lane_change_adjust_new*DT_MDL, 0.0)
         # 98% certainty
-        if lane_change_prob < 0.02 and self.lane_change_ll_prob < 0.01:
+        if lane_change_prob < 0.03 and self.lane_change_ll_prob < 0.02:
           self.lane_change_state = LaneChangeState.laneChangeFinishing
 
       # finishing
       elif self.lane_change_state == LaneChangeState.laneChangeFinishing:
         # fade in laneline over 1s
         self.lane_change_ll_prob = min(self.lane_change_ll_prob + DT_MDL, 1.0)
-        if one_blinker and self.lane_change_ll_prob > 0.99:
+        if one_blinker and self.lane_change_ll_prob > 0.98:
           self.lane_change_state = LaneChangeState.preLaneChange
-        elif self.lane_change_ll_prob > 0.99:
+        elif self.lane_change_ll_prob > 0.98:
           self.lane_change_state = LaneChangeState.off
 
     if self.lane_change_state in [LaneChangeState.off, LaneChangeState.preLaneChange]:
@@ -285,6 +293,13 @@ class LateralPlanner():
     self.desired_steering_wheel_angle_deg = -float(math.degrees(curvature_desired * VM.sR)/curvature_factor) + steering_wheel_angle_offset_deg
     self.desired_steering_wheel_angle_rate_deg = -float(math.degrees(desired_curvature_rate * VM.sR)/curvature_factor)
 
+    # Atom's steer angle limitation
+    if v_ego < 9 and int(Params().get('UserOption3')) == 1: # 32.4km/h
+      xp = [4,9]  # 14.4km/h ~ 32.4km/h
+      fp2 = [1,3]  # 1도 ~ 3도
+      limit_steers = interp(v_ego, xp, fp2)
+      self.desired_steering_wheel_angle_deg = self.limit_ctrl(self.desired_steering_wheel_angle_deg, limit_steers, sm['carState'].steeringAngleDeg)
+
     #  Check for infeasable MPC solution
     mpc_nans = any(math.isnan(x) for x in self.mpc_solution.curvature)
     t = sec_since_boot()
@@ -313,10 +328,7 @@ class LateralPlanner():
 
     plan_send.lateralPlan.steeringAngleDeg = float(self.desired_steering_wheel_angle_deg)
     plan_send.lateralPlan.steeringRateDeg = float(self.desired_steering_wheel_angle_rate_deg)
-    if self.angle_offset_select == 0:
-      plan_send.lateralPlan.angleOffsetDeg = float(sm['liveParameters'].angleOffsetAverageDeg)
-    else:
-      plan_send.lateralPlan.angleOffsetDeg = float(sm['liveParameters'].angleOffsetDeg)
+    plan_send.lateralPlan.angleOffsetDeg = float(sm['liveParameters'].angleOffsetAverageDeg)
     plan_send.lateralPlan.mpcSolutionValid = bool(plan_solution_valid)
 
     plan_send.lateralPlan.desire = self.desire
